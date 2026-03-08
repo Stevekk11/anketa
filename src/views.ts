@@ -84,7 +84,7 @@ export function renderPage(
 
   const modeToggle = viewOnly
     ? `<a href="/" class="btn btn-outline-light btn-sm">🗳️ Hlasovat</a>`
-    : `<a href="/results" class="btn btn-outline-light btn-sm">📊 Jen výsledky</a>`;
+    : ``;
 
   const votingScript = viewOnly
     ? ''
@@ -162,6 +162,7 @@ export function renderPage(
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Anketa</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
@@ -232,7 +233,13 @@ export function renderPage(
       form.addEventListener('submit', async function (e) {
         e.preventDefault();
         const message = textarea.value.trim();
-        if (!message) return;
+        if (!message) {
+          msgEl.className = 'alert alert-warning mt-3';
+          msgEl.textContent = 'Popis problému nesmí být prázdný.';
+          msgEl.classList.remove('d-none');
+          textarea.focus();
+          return;
+        }
         const author = authorInput ? authorInput.value.trim() : '';
 
         btn.disabled = true;
@@ -287,6 +294,7 @@ export function renderAboutPage(): string {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>O anketě</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
   <style>
@@ -334,6 +342,7 @@ export function renderSettingsPage(): string {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Nastavení</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
   <style>
