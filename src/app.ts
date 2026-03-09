@@ -1,6 +1,7 @@
 import express from 'express';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
+import crypto from 'crypto';
 import path from 'path';
 import logger from './logger';
 import router from './routes';
@@ -11,28 +12,36 @@ const app = express();
 // from the X-Forwarded-For header instead of 127.0.0.1
 app.set('trust proxy', 1);
 
-// Security headers
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'", "'unsafe-inline'",  "https://cdn.jsdelivr.net"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-hashes'", "https://cdn.jsdelivr.net"],
-      scriptSrcAttr: ["'unsafe-inline'"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
-      imgSrc: ["'self'", "data:"],
-      connectSrc: ["'self'", "https://cdn.jsdelivr.net"],
-      fontSrc: ["'self'", "https://cdn.jsdelivr.net"],
-      objectSrc: ["'none'"],
-      baseUri: ["'self'"],
-      upgradeInsecureRequests: null, // Disable upgrade-insecure-requests to allow mixed content if necessary (keeping HTTP)
+// Generate a per-request nonce and attach it to res.locals before helmet runs
+app.use((_req, res, next) => {
+  res.locals.nonce = crypto.randomBytes(16).toString('base64');
+  next();
+});
+
+// Security headers – CSP uses per-request nonce so no unsafe-inline is needed
+app.use((req, res, next) => {
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", `'nonce-${res.locals.nonce as string}'`, "https://cdn.jsdelivr.net"],
+        scriptSrcAttr: ["'none'"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
+        imgSrc: ["'self'", "data:"],
+        connectSrc: ["'self'"],
+        fontSrc: ["'self'", "https://cdn.jsdelivr.net"],
+        objectSrc: ["'none'"],
+        baseUri: ["'self'"],
+        upgradeInsecureRequests: null, // Disable upgrade-insecure-requests to allow mixed content if necessary (keeping HTTP)
+      },
     },
-  },
-  hsts: {
-    maxAge: 31536000,
-    includeSubDomains: true,
-    preload: true,
-  },
-}));
+    hsts: {
+      maxAge: 31536000,
+      includeSubDomains: true,
+      preload: true,
+    },
+  })(req, res, next);
+});
 
 // Add Permissions-Policy header
 app.use((_req, res, next) => {

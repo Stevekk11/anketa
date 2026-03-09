@@ -7,11 +7,11 @@ import logger from './logger';
 const router = Router();
 
 router.get('/about', (_req: Request, res: Response) => {
-  res.send(renderAboutPage());
+  res.send(renderAboutPage(res.locals.nonce as string));
 });
 
 router.get('/settings', (_req: Request, res: Response) => {
-  res.send(renderSettingsPage());
+  res.send(renderSettingsPage(res.locals.nonce as string));
 });
 
 // GET / – hlavní stránka s anketami (hlasovací formuláře)
@@ -27,14 +27,14 @@ router.get('/', (req: Request, res: Response) => {
       return cookieVal && parseInt(cookieVal, 10) > resetTime;
     });
 
-  const html = renderPage(config.polls, allResults, false, votedPollIds);
+  const html = renderPage(config.polls, allResults, false, votedPollIds, res.locals.nonce as string);
   res.send(html);
 });
 
 // GET /results – pouze zobrazení výsledků bez formulářů
 router.get('/results', (_req: Request, res: Response) => {
   const allResults = getAllResults();
-  const html = renderPage(config.polls, allResults, true);
+  const html = renderPage(config.polls, allResults, true, [], res.locals.nonce as string);
   res.send(html);
 });
 

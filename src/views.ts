@@ -73,7 +73,8 @@ export function renderPage(
   polls: PollConfig[],
   allResults: PollResults[],
   viewOnly: boolean,
-  votedPollIds: number[] = []
+  votedPollIds: number[] = [],
+  nonce: string = ''
 ): string {
   const cards = polls
     .map((poll) => {
@@ -89,7 +90,7 @@ export function renderPage(
   const votingScript = viewOnly
     ? ''
     : `
-  <script>
+  <script nonce="${nonce}">
     document.querySelectorAll('.vote-form').forEach(form => {
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -213,9 +214,10 @@ export function renderPage(
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
           integrity="sha384-YvpcrYf0tY3lHB60NNkmXc4s9bIOgUxi8T/jzmEBjsqgdC0r+AcYMhj6rB8FNQTD"
-          crossorigin="anonymous"></script>
+          crossorigin="anonymous"
+          nonce="${nonce}"></script>
   ${votingScript}
-  <script>
+  <script nonce="${nonce}">
     (function () {
       const textarea = document.getElementById('reportMessage');
       const authorInput = document.getElementById('reportAuthor');
@@ -287,7 +289,7 @@ function escapeHtml(str: string): string {
     .replace(/'/g, '&#039;');
 }
 
-export function renderAboutPage(): string {
+export function renderAboutPage(nonce: string = ''): string {
   return `<!DOCTYPE html>
 <html lang="cs">
 <head>
@@ -335,7 +337,7 @@ export function renderAboutPage(): string {
 </html>`;
 }
 
-export function renderSettingsPage(): string {
+export function renderSettingsPage(nonce: string = ''): string {
   return `<!DOCTYPE html>
 <html lang="cs">
 <head>
@@ -401,7 +403,7 @@ export function renderSettingsPage(): string {
     </div>
   </div>
   
-  <script>
+  <script nonce="${nonce}">
     document.getElementById('resetBtn')?.addEventListener('click', async () => {
       const token = document.getElementById('resetToken').value;
       const msgEl = document.getElementById('resetMsg');
